@@ -15,38 +15,120 @@ import Common
 
 @main
 struct Day01: Puzzle {
-    // TODO: Start by defining your input/output types :)
-    typealias Input = String
-    typealias OutputPartOne = Never
-    typealias OutputPartTwo = Never
+    typealias Input = [Rotation]
+    typealias OutputPartOne = Int
+    typealias OutputPartTwo = Int
 }
+
+enum Rotation: Parsable, CustomStringConvertible {
+    case left(amount: Int)
+    case right(amount: Int)
+
+    static func parse(raw: String) throws -> Rotation {
+        let rawDirection = raw[raw.startIndex]
+        let rawAmount = raw[raw.index(after: raw.startIndex)...]
+        guard let amount = Int(rawAmount) else {
+            throw InputError.unexpectedInput(unrecognized: raw)
+        }
+        return switch rawDirection {
+        case "L": .left(amount: amount)
+        case "R": .right(amount: amount)
+        default: throw InputError.unexpectedInput(unrecognized: raw)
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .left(let amount): "L\(amount)"
+        case .right(let amount): "R\(amount)"
+        }
+    }
+}
+
+let example = """
+L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82
+"""
 
 // MARK: - PART 1
 
 extension Day01 {
     static var partOneExpectations: [any Expectation<Input, OutputPartOne>] {
         [
-            // TODO: add expectations for part 1
+            assert(expectation: 3, fromRaw: example)
         ]
     }
 
     static func solvePartOne(_ input: Input) async throws -> OutputPartOne {
-        // TODO: Solve part 1 :)
-        throw ExecutionError.notSolved
+        var position = 50
+        var count = 0
+        for instruction in input {
+            switch instruction {
+            case .left(let amount):
+                position -= amount
+            case .right(let amount):
+                position += amount
+            }
+            position %= 100
+            if position < 0 {
+                position += 100
+            }
+            if position == 0 {
+                count += 1
+            }
+        }
+        return count
     }
 }
 
 // MARK: - PART 2
+// 6225 too low
+// 6229 too low
 
 extension Day01 {
     static var partTwoExpectations: [any Expectation<Input, OutputPartTwo>] {
         [
-            // TODO: add expectations for part 2
+            assert(expectation: 6, fromRaw: example)
         ]
     }
 
     static func solvePartTwo(_ input: Input) async throws -> OutputPartTwo {
-        // TODO: Solve part 2 :)
-        throw ExecutionError.notSolved
+        var position = 50
+        var count = 0
+        for instruction in input {
+            var increment = position > 0
+            switch instruction {
+            case .left(let amount):
+                position -= amount
+            case .right(let amount):
+                position += amount
+            }
+            while position < 0 {
+                position += 100
+                if increment {
+                    count += 1
+                } else {
+                    increment = true
+                }
+            }
+            var check = true
+            while position >= 100 {
+                position -= 100
+                count += 1
+                check = false
+            }
+            if check && position == 0 {
+                count += 1
+            }
+        }
+        return count
     }
 }
