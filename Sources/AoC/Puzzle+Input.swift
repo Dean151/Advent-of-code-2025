@@ -55,7 +55,7 @@ extension Puzzle {
 
     /// Get the input file content as a unique string
     public static func rawInput() throws -> String {
-        let raw = try String(contentsOf: inputFile)
+        let raw = try String(contentsOf: inputFile, encoding: .utf8)
         switch rawInputTrimMode {
         case .none:
             return raw
