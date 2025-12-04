@@ -15,9 +15,48 @@ import Common
 
 @main
 struct Day04: Puzzle {
-    typealias Input = String
-    typealias OutputPartOne = Never
-    typealias OutputPartTwo = Never
+    typealias Input = Warehouse
+    typealias OutputPartOne = Int
+    typealias OutputPartTwo = Int
+}
+
+let example = """
+..@@.@@@@.
+@@@.@.@.@@
+@@@@@.@.@@
+@.@@@@..@.
+@@.@@@@.@@
+.@@@@@@@.@
+.@.@.@.@@@
+@.@@@.@@@@
+.@@@@@@@@.
+@.@.@@@.@.
+"""
+
+struct Warehouse: Parsable {
+    let rollsPositions: Set<Coordinates>
+
+    static func parse(raw: String) throws -> Warehouse {
+        var positions = Set<Coordinates>()
+        for (y,line) in raw.components(separatedBy: .newlines).enumerated() {
+            for (x,char) in line.enumerated() {
+                if char == "@" {
+                    positions.insert(.init(x: x, y: y))
+                }
+            }
+        }
+        return .init(rollsPositions: positions)
+    }
+
+    var accessibleRolls: Set<Coordinates> {
+        rollsPositions.filter {
+            $0.allNeighbors.filter(rollsPositions.contains).count < 4
+        }
+    }
+
+    func removing(rolls: Set<Coordinates>) -> Self {
+        .init(rollsPositions: rollsPositions.subtracting(rolls))
+    }
 }
 
 // MARK: - PART 1
@@ -25,13 +64,12 @@ struct Day04: Puzzle {
 extension Day04 {
     static var partOneExpectations: [any Expectation<Input, OutputPartOne>] {
         [
-            // TODO: add expectations for part 1
+            assert(expectation: 13, fromRaw: example)
         ]
     }
 
     static func solvePartOne(_ input: Input) async throws -> OutputPartOne {
-        // TODO: Solve part 1 :)
-        throw ExecutionError.notSolved
+        return input.accessibleRolls.count
     }
 }
 
@@ -40,12 +78,19 @@ extension Day04 {
 extension Day04 {
     static var partTwoExpectations: [any Expectation<Input, OutputPartTwo>] {
         [
-            // TODO: add expectations for part 2
+            assert(expectation: 43, fromRaw: example)
         ]
     }
 
     static func solvePartTwo(_ input: Input) async throws -> OutputPartTwo {
-        // TODO: Solve part 2 :)
-        throw ExecutionError.notSolved
+        var count = 0
+        var warehouse = input
+        var accessibleRolls: Set<Coordinates>
+        repeat {
+            accessibleRolls = warehouse.accessibleRolls
+            count += accessibleRolls.count
+            warehouse = warehouse.removing(rolls: accessibleRolls)
+        } while !accessibleRolls.isEmpty
+        return count
     }
 }
