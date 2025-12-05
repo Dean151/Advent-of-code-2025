@@ -75,7 +75,7 @@ struct ProductIdRange: Parsable, CustomStringConvertible {
         }
         var invalidIds: Set<Int> = []
         for size in 1...lowest.count/2 {
-            invalidIds = invalidIds.union(invalidIdsOfParts(ofSize: size))
+            invalidIds.formUnion(invalidIdsOfParts(ofSize: size))
         }
         return invalidIds
     }
